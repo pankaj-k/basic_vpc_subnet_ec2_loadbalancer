@@ -12,6 +12,14 @@ data "aws_ami" "amazon_linux" {
 module "ec2" {
   source = "terraform-aws-modules/ec2-instance/aws"
 
+  # Ensure EC2 instances are created only after VPC, subnets, and NAT gateway are ready.
+  # Otherwise they will fail to access internet to download updates and install Apache.
+  depends_on = [
+    module.vpc.natgw_ids,                 # Wait for NAT Gateway to be created so that EC2 in private subnet can use it.
+    module.vpc.private_route_table_ids,   # Wait for route tables
+    module.vpc.vpc_id                     # Wait for VPC
+  ]
+
   name = "demo_ec2_instance-${each.key}"
   instance_type = "t3.micro"
   ami           = data.aws_ami.amazon_linux.id
@@ -63,14 +71,33 @@ module "ec2" {
   # user_data to install Apache and show instance name
   # --------------------
   user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              yum install -y httpd
-              systemctl enable httpd
-              systemctl start httpd
-              INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-              echo "OK from $INSTANCE_ID" > /var/www/html/index.html
-              EOF
+  #!/bin/bash
+  exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+  yum update -y
+  yum install -y httpd
+  systemctl enable httpd
+  systemctl start httpd
+
+  # Wait for Apache to start
+  sleep 5
+
+  # Get instance hostname
+  HOSTNAME=$(hostname)
+
+  # Create index.html with proper permissions
+  echo "OK from $HOSTNAME" > /var/www/html/index.html
+  chown apache:apache /var/www/html/index.html
+  chmod 644 /var/www/html/index.html
+  chown -R apache:apache /var/www/html/
+  chmod -R 755 /var/www/html/
+  systemctl restart httpd
+  sleep 3
+  systemctl status httpd
+  curl -I http://localhost/ || echo "Local curl failed"
+  ls -la /var/www/html/
+  cat /var/www/html/index.html
+  echo "User data script completed at $(date)"
+  EOF
 
   tags = {
     Terraform   = "true"
