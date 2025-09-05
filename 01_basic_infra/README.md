@@ -23,4 +23,4 @@ AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 AWS_REGION (e.g., us-east-1)
 
-The delete of infra is manual. Best practice is to keep it that way Prod.
+The delete of infra is manual. Best practice is to keep it that way Prod. terraform-destory.yml enables manual destroy.
