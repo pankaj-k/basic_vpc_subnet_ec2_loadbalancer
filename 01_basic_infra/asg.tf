@@ -94,3 +94,57 @@ EOF
     Environment = "dev"
   }
 }
+
+
+# Notifications for scaling up or down of servers in ASG
+# CREATE SNS TOPIC FOR ASG NOTIFICATIONS
+resource "aws_sns_topic" "asg_notifications" {
+  name = "demo-asg-notifications"
+  
+  tags = {
+    Name        = "ASG Notifications"
+    Environment = "dev"
+  }
+}
+
+# SNS TOPIC POLICY (allows ASG to publish)
+resource "aws_sns_topic_policy" "asg_notifications" {
+  arn = aws_sns_topic.asg_notifications.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "autoscaling.amazonaws.com"
+        }
+        Action = "sns:Publish"
+        Resource = aws_sns_topic.asg_notifications.arn
+      }
+    ]
+  })
+}
+
+# EMAIL SUBSCRIPTION (replace with your email)
+resource "aws_sns_topic_subscription" "email" {
+  topic_arn = aws_sns_topic.asg_notifications.arn
+  protocol  = "email"
+  endpoint  = "pk.241011@gmail.com"  # Replace with your email
+}
+
+# ASG NOTIFICATION CONFIGURATION
+resource "aws_autoscaling_notification" "demo_notifications" {
+  group_names = [module.asg.autoscaling_group_name]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+    "autoscaling:EC2_INSTANCE_TERMINATE",
+    "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+    "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+  ]
+
+  topic_arn = aws_sns_topic.asg_notifications.arn
+
+  depends_on = [module.asg]
+}
