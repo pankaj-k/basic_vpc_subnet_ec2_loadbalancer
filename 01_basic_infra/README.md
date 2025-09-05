@@ -8,7 +8,10 @@ NOTES:
 4. Loadbalancer created in public subnet to direct traffic to EC2 servers running in private subnet.
 5. NAT gateways are created so that EC2 servers in private subnet can access internet to download OS patches.
 6. NAT is expensive. Destory the infra once you are done.
+7. NAT takes time to come up. Delay the EC2 server creation till NAT is up. Otherwise Apache install will fail on EC2.
+8. Using AWS EC2 Terraform module to enable session manager based access to EC2 instance via AWS Console UI. 
 
+######################################################################################################################
 Github actions has been configured to run it when you check in the code on main.
 Each repo in Github has to be configured with your AWS secrets to enable it access. 
 
