@@ -63,10 +63,10 @@ resource "aws_lb_target_group" "demo_lb_target_group" {
     healthy_threshold   = 3
     unhealthy_threshold = 3
     interval            = 30
-    path                = "/"           # Apache server root
+    path                = "/" # Apache server root
     port                = "80"
     protocol            = "HTTP"
-    matcher             = "200"         # Expect HTTP 200 OK
+    matcher             = "200" # Expect HTTP 200 OK
     timeout             = 5
   }
 }

@@ -12,6 +12,8 @@ NOTES:
 8. Using AWS EC2 Terraform module to enable session manager based access to EC2 instance via AWS Console UI. 
 9. Autoscaling module used to keep a min number of EC2 instances running.
 10. CPU based scaling is enabled. But not tested. You can manually install a load generator on the EC2 instance to check.
+    - stress-ng is a good choice to push CPU usage. Install it on Linux EC2 instances.
+    - To run stress-ng : stress-ng --cpu 2 --timeout 300s --metrics-brief
 11. Notification configured when the Autoscaling scales up/down via email. Make sure to change the email address.
 ######################################################################################################################
 Github actions has been configured to run it when you check in the code on main.
