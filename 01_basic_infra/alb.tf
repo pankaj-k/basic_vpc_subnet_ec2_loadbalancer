@@ -71,12 +71,16 @@ resource "aws_lb_target_group" "demo_lb_target_group" {
   }
 }
 
+# # Comment out when you switch over to autoscaling group.
+# resource "aws_lb_target_group_attachment" "demo_lb_target_group_attachment" {
+#   for_each = module.ec2
 
-resource "aws_lb_target_group_attachment" "demo_lb_target_group_attachment" {
-  for_each = module.ec2
+#   target_group_arn = aws_lb_target_group.demo_lb_target_group.arn
+#   target_id        = each.value.id
+#   port             = 80
+# }
 
-  target_group_arn = aws_lb_target_group.demo_lb_target_group.arn
-  target_id        = each.value.id
-  port             = 80
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  autoscaling_group_name = module.asg.autoscaling_group_name
+  lb_target_group_arn    = aws_lb_target_group.demo_lb_target_group.arn
 }
-

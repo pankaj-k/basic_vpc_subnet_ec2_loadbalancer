@@ -10,7 +10,8 @@ NOTES:
 6. NAT is expensive. Destory the infra once you are done.
 7. NAT takes time to come up. Delay the EC2 server creation till NAT is up. Otherwise Apache install will fail on EC2.
 8. Using AWS EC2 Terraform module to enable session manager based access to EC2 instance via AWS Console UI. 
-
+9. Autoscaling module used to keep a min number of EC2 instances running.
+10. CPU based scaling is enabled. But not tested. You can manually install a load generator on the EC2 instance to check.
 ######################################################################################################################
 Github actions has been configured to run it when you check in the code on main.
 Each repo in Github has to be configured with your AWS secrets to enable it access. 
