@@ -14,6 +14,7 @@ NOTES:
 10. CPU based scaling is enabled. But not tested. You can manually install a load generator on the EC2 instance to check.
     - stress-ng is a good choice to push CPU usage. Install it on Linux EC2 instances.
     - To run stress-ng : stress-ng --cpu 2 --timeout 300s --metrics-brief
+    - Scale out happens fast. 5 mins. But scale down is slow. Around 10 mins after load is removed.
 11. Notification configured when the Autoscaling scales up/down via email. Make sure to change the email address.
 ######################################################################################################################
 Github actions has been configured to run it when you check in the code on main.
