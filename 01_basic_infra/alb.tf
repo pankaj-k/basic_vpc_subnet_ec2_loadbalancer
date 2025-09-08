@@ -25,10 +25,10 @@ module "alb" {
     }
   }
 
-  #   access_logs = {
-  #     enabled = true
-  #     bucket  = "demo-alb-logs-bucket"
-  #   }
+  access_logs = {
+    enabled = true
+    bucket  = module.s3_bucket_for_logs.bucket
+  }
 
   tags = {
     Environment = "dev"
