@@ -21,7 +21,7 @@ module "demo_infra" {
 # cannot create a bucket to store state. I created it manually. 
 terraform {
   backend "s3" {
-    bucket = "store-tf-state-yourbucketname"
+    bucket = "store-tf-state-somthingrandom" # Change it to your unique bucket name.
     key    = "basic_vpc_subnet_ec2_loadbalancer/terraform.tfstate"
     region = "us-east-1" # This need not be same as the region where the resources are created.
   }

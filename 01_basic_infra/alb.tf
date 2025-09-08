@@ -27,7 +27,7 @@ module "alb" {
 
   access_logs = {
     enabled = true
-    bucket  = module.s3_bucket_for_logs.bucket
+    bucket  = module.s3_bucket_for_logs.s3_bucket_id
   }
 
   tags = {

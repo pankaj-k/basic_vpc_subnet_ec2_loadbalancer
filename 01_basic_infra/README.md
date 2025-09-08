@@ -16,6 +16,7 @@ NOTES:
     - To run stress-ng : stress-ng --cpu 2 --timeout 300s --metrics-brief
     - Scale out happens fast. 5 mins. But scale down is slow. Around 10 mins after load is removed.
 11. Notification configured when the Autoscaling scales up/down via email. Make sure to change the email address.
+12. The Application Load Balancer logs will be written in S3
 ######################################################################################################################
 Github actions has been configured to run it when you check in the code on main.
 Each repo in Github has to be configured with your AWS secrets to enable it access. 
