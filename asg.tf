@@ -17,8 +17,8 @@ resource "aws_security_group" "ec2_sg" {
 
   ingress {
     description     = "HTTP from ALB"
-    from_port       = 80
-    to_port         = 80
+    from_port       = 8077
+    to_port         = 8077
     protocol        = "tcp"
     security_groups = [module.alb.security_group_id] # only ALB allowed
   }
@@ -93,17 +93,18 @@ module "asg" {
   # EC2 config
   image_id      = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
+  user_data       = base64encode(file("user_data_logstash_install.sh"))
 
-  user_data = base64encode(<<-EOF
-#!/bin/bash
-yum update -y
-yum install -y httpd
-systemctl enable httpd
-systemctl start httpd
-HOSTNAME=$(hostname)
-echo "OK from $HOSTNAME" > /var/www/html/index.html
-EOF
-  )
+#   user_data = base64encode(<<-EOF
+# #!/bin/bash
+# yum update -y
+# yum install -y httpd
+# systemctl enable httpd
+# systemctl start httpd
+# HOSTNAME=$(hostname)
+# echo "OK from $HOSTNAME" > /var/www/html/index.html
+# EOF
+#   )
   tags = {
     Terraform   = "true"
     Environment = "dev"
@@ -145,7 +146,7 @@ resource "aws_sns_topic_policy" "asg_notifications" {
 resource "aws_sns_topic_subscription" "email" {
   topic_arn = aws_sns_topic.asg_notifications.arn
   protocol  = "email"
-  endpoint  = "changethisemail@example.com" # Replace with your email
+  endpoint  = "pk.241011@gmail.com" # Replace with your email
 }
 
 # ASG NOTIFICATION CONFIGURATION

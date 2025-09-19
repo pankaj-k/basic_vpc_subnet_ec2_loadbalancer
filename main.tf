@@ -13,15 +13,15 @@ provider "aws" {
   region = "us-east-1"
 }
 
-module "demo_infra" {
-  source = "./01_basic_infra"
-}
+# module "demo_infra" {
+#   source = "./01_basic_infra"
+# }
 
 # Terraform state in S3 bucket. bucket variable needs a hard coded pre-existing bucket name. Terraform 
 # cannot create a bucket to store state. I created it manually. 
 terraform {
   backend "s3" {
-    bucket = "store-tf-state-somthingrandom" # Change it to your unique bucket name.
+    bucket = "store-tf-state-54fwty2045" # Change it to your unique bucket name.
     key    = "basic_vpc_subnet_ec2_loadbalancer/terraform.tfstate"
     region = "us-east-1" # This need not be same as the region where the resources are created.
   }

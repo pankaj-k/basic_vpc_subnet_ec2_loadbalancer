@@ -50,7 +50,7 @@ resource "aws_lb_listener" "demo_lb_listener" {
 
 resource "aws_lb_target_group" "demo_lb_target_group" {
   name        = "demo-lb-target-group"
-  port        = 80
+  port        = 8077
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = module.vpc.vpc_id
@@ -64,7 +64,7 @@ resource "aws_lb_target_group" "demo_lb_target_group" {
     unhealthy_threshold = 3
     interval            = 30
     path                = "/" # Apache server root
-    port                = "80"
+    port                = "8077"
     protocol            = "HTTP"
     matcher             = "200" # Expect HTTP 200 OK
     timeout             = 5
