@@ -43,7 +43,7 @@ module "alb" {
 }
 
 # Easier to create listner and target group separately out of the module.
-
+# Redirect HTTP to HTTPS listener.
 resource "aws_lb_listener" "demo_lb_listener_http" {
   load_balancer_arn = module.alb.arn
   port              = 80

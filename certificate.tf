@@ -32,6 +32,10 @@ resource "aws_route53_record" "cert_validation" {
   type    = each.value.type
   ttl     = 60
   records = [each.value.record]
+
+  depends_on = [
+    aws_acm_certificate.this
+  ]
 }
 
 ########################################################
