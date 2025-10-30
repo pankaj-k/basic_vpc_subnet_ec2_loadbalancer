@@ -50,3 +50,17 @@ resource "aws_acm_certificate_validation" "this" {
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
+
+#############################################
+# Create DNS alias record in Route 53 for ALB
+#############################################
+resource "aws_route53_record" "alb_alias" {
+  zone_id = data.aws_route53_zone.uselesschatter.id
+  name    = "uselesschatter.com"
+  type    = "A"
+  alias {
+    name                   = module.alb.dns_name
+    zone_id                = module.alb.zone_id
+    evaluate_target_health = true
+  }
+}
