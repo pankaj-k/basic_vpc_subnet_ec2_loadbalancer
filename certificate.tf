@@ -1,5 +1,5 @@
 data "aws_route53_zone" "uselesschatter" {
-  name         = "uselesschatter.com."  
+  name         = "uselesschatter.com."
   private_zone = false
 }
 
@@ -23,6 +23,12 @@ resource "aws_acm_certificate" "this" {
 # Create DNS validation record in Route 53
 #############################################
 resource "aws_route53_record" "cert_validation" {
+
+  # Prevent errors like:Error: creating Route53 Record: operation error Route 53: ChangeResourceRecordSets
+  # InvalidChangeBatch: [Tried to create resource record set but it already exists  
+  lifecycle {
+    create_before_destroy = true
+  }
   for_each = {
     for dvo in aws_acm_certificate.this.domain_validation_options :
     dvo.domain_name => {
@@ -49,5 +55,5 @@ resource "aws_route53_record" "cert_validation" {
 resource "aws_acm_certificate_validation" "this" {
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
-  depends_on = [aws_route53_record.cert_validation]
+  depends_on              = [aws_route53_record.cert_validation]
 }
