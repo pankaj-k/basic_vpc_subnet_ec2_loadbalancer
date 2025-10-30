@@ -32,7 +32,7 @@ resource "aws_route53_record" "cert_validation" {
     }
   }
 
-  zone_id = data.aws_route53_zone.uselesschatter.id # <-- PUT YOUR HOSTED ZONE ID HERE
+  zone_id = data.aws_route53_zone.uselesschatter.id # Hosted Zone ID
   name    = each.value.name
   type    = each.value.type
   ttl     = 60
