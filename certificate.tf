@@ -1,3 +1,8 @@
+data "aws_route53_zone" "uselesschatter" {
+  name         = "uselesschatter.com."  
+  private_zone = false
+}
+
 ############################
 # ACM Certificate (us-east-1)
 ############################
@@ -27,7 +32,7 @@ resource "aws_route53_record" "cert_validation" {
     }
   }
 
-  zone_id = "Z03528181BRNUHEA9F2RV" # <-- PUT YOUR HOSTED ZONE ID HERE
+  zone_id = data.aws_route53_zone.uselesschatter.id # <-- PUT YOUR HOSTED ZONE ID HERE
   name    = each.value.name
   type    = each.value.type
   ttl     = 60
@@ -44,4 +49,5 @@ resource "aws_route53_record" "cert_validation" {
 resource "aws_acm_certificate_validation" "this" {
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+  depends_on = [aws_route53_record.cert_validation]
 }
