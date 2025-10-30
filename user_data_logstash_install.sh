@@ -23,9 +23,9 @@ sed -i 's|path.data: /var/lib/logstash|path.data: /home/logstash/data|' /etc/log
 sed -i 's|path.logs: /var/log/logstash|path.logs: /home/logstash/logs|' /etc/logstash/logstash.yml
 sed -i 's|# pipeline.ordered: auto|pipeline.ordered: false|' /etc/logstash/logstash.yml
 sed -i 's|# queue.type: memory|queue.type: persisted|' /etc/logstash/logstash.yml
-sed -i 's|# queue.max_bytes: 1024mb|queue.max_bytes: 5gb|' /etc/logstash/logstash.yml
+sed -i 's|# queue.max_bytes: 1024mb|queue.max_bytes: 2gb|' /etc/logstash/logstash.yml
 sed -i 's|# dead_letter_queue.enable: false|dead_letter_queue.enable: true|' /etc/logstash/logstash.yml
-sed -i 's|# dead_letter_queue.max_bytes: 1024mb|dead_letter_queue.max_bytes: 2gb|' /etc/logstash/logstash.yml
+sed -i 's|# dead_letter_queue.max_bytes: 1024mb|dead_letter_queue.max_bytes: 1gb|' /etc/logstash/logstash.yml
 
 cat <<EOT2 >> /home/logstash/pipelines/http_8077.conf
 input

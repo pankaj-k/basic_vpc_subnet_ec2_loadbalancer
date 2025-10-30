@@ -17,6 +17,13 @@ module "alb" {
       description = "HTTP web traffic"
       cidr_ipv4   = "0.0.0.0/0"
     }
+    all_https = {
+      from_port   = 443
+      to_port     = 443
+      ip_protocol = "tcp"
+      description = "HTTPS web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
   }
   security_group_egress_rules = {
     all = {
@@ -37,16 +44,35 @@ module "alb" {
 
 # Easier to create listner and target group separately out of the module.
 
-resource "aws_lb_listener" "demo_lb_listener" {
+resource "aws_lb_listener" "demo_lb_listener_http" {
   load_balancer_arn = module.alb.arn
   port              = 80
   protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "demo_lb_listener_https" {
+  load_balancer_arn = module.alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate_validation.this.certificate_arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.demo_lb_target_group.arn
   }
 }
+
 
 resource "aws_lb_target_group" "demo_lb_target_group" {
   name        = "demo-lb-target-group"
