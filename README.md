@@ -1,32 +1,72 @@
-Create a basic infra setup with EC2 instances behind a loadbalancer. 
-Use the already provided AWS Terraform modules rather than handcoding everything. Leverage not re-invent.
+# Logstash on Autoscaled EC2 Behind an Application Load Balancer (Terraform)
 
-NOTES:
-1. Private subnet created for running App servers.
-2. Database subnet (supported in module) for running databases if needed. They are also private subnet. 
-3. Public subnet to run Webservers. Not getting used here. But created.
-4. Loadbalancer created in public subnet to direct traffic to EC2 servers running in private subnet.
-5. NAT gateways are created so that EC2 servers in private subnet can access internet to download OS patches.
-6. NAT is expensive. Destory the infra once you are done.
-7. NAT takes time to come up. Delay the EC2 server creation till NAT is up. Otherwise Apache install will fail on EC2.
-8. Using AWS EC2 Terraform module to enable session manager based access to EC2 instance via AWS Console UI. 
-9. Autoscaling module used to keep a min number of EC2 instances running.
-10. CPU based scaling is enabled. But not tested. You can manually install a load generator on the EC2 instance to check.
-    - stress-ng is a good choice to push CPU usage. Install it on Linux EC2 instances.
-    - To run stress-ng : stress-ng --cpu 2 --timeout 300s --metrics-brief
-    - Scale out happens fast. 5 mins. But scale down is slow. Around 10 mins after load is removed.
-11. Notification configured when the Autoscaling scales up/down via email. Make sure to change the email address.
-12. The Application Load Balancer logs will be written in S3
-######################################################################################################################
-Github actions has been configured to run it when you check in the code on main.
-Each repo in Github has to be configured with your AWS secrets to enable it access. 
+This project provisions a baseline AWS infrastructure for running Logstash (or any application) on EC2 instances behind an **Application Load Balancer (ALB)**. The setup is built entirely using **Terraform**, leveraging **AWS Terraform modules** rather than manually defining every resource.
 
-Step: Store AWS credentials in GitHub Secrets
+> **Principle:** *Leverage, don’t reinvent.*  
+> Using proven modules reduces complexity and improves maintainability.
 
-Go to your repo → Settings → Secrets and variables → Actions and add:
+---
 
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_REGION (e.g., us-east-1)
+## Architecture Overview
 
-The delete of infra is manual. Best practice is to keep it that way Prod. terraform-destory.yml enables manual destroy.
+The infrastructure creates:
+
+| Component | Purpose |
+|----------|---------|
+| **VPC** with public and private subnets | Logical networking layout |
+| **Private subnets** | Application servers (EC2 instances) run here |
+| **Public subnets** | Used by the Application Load Balancer |
+| **Application Load Balancer** | Receives HTTPS/HTTP traffic and forwards internally to private EC2 nodes |
+| **Autoscaling Group** | Automatically adjusts EC2 capacity based on load |
+| **NAT Gateway** | Allows private EC2 instances outbound internet access for updates |
+| **S3 Bucket** | Stores ALB access logs (optional) |
+| **ACM Certificate + Route 53 DNS (Optional)** | Provides a public HTTPS endpoint |
+
+---
+
+## Key Notes & Behaviors
+
+1. **Private subnets** are used for EC2 application servers.
+2. **Public subnets exist**, but only the ALB is placed there.
+3. **NAT Gateways** are required so private EC2 instances can install packages/patches.
+   - NAT Gateways are billed hourly — **destroy when not needed** to avoid cost.
+4. NAT provisioning can take time — you may need to **delay EC2 provisioning** or rely on retries for package install.
+5. EC2 access is via **AWS Systems Manager Session Manager**, not SSH.
+6. **Autoscaling**
+   - Minimum number of EC2 instances is maintained.
+   - Can scale on CPU utilization trigger.
+   - **Scale-out is fast**; **scale-in can lag ~10 minutes**.
+   - To generate CPU load:
+     ```bash
+     sudo apt install stress-ng -y
+     stress-ng --cpu 2 --timeout 300s --metrics-brief
+     ```
+7. **Email notifications** are sent when scale-in/out events occur (update email in configuration).
+8. **ALB access logs** are delivered to S3.
+
+---
+
+## GitHub Actions (CI/CD)
+
+GitHub Actions can automatically run `terraform plan` and `terraform apply` when changes are pushed to `main`.
+
+### Configure GitHub Secrets
+
+Navigate to:  
+**Repo → Settings → Secrets and variables → Actions**
+
+Add:
+
+| Name | Value |
+|------|-------|
+| `AWS_ACCESS_KEY_ID` | Your AWS Access Key |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS Secret Key |
+| `AWS_REGION` | Example: `us-east-1` |
+
+### Destroying Infrastructure
+
+Destruction is **manual by design** (best practice for production environments).
+
+Run manually 
+```terraform destroy```
+or use the provided GitHub Actions workflow terraform-destroy.yml.
